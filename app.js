@@ -1,7 +1,9 @@
 // ---------- Referencias a elementos ----------
 const $pesos = document.getElementById('pesos');
 const $dolares = document.getElementById('dolares');
+const $yuanes = document.getElementById('yuanes');
 const $cotizacion = document.getElementById('cotizacion');
+const $cotizacionCny = document.getElementById('cotizacionCny');
 const $descuento = document.getElementById('descuento');
 const $nacionalizacion = document.getElementById('nacionalizacion');
 
@@ -61,11 +63,13 @@ function formatearMil(numero) {
 function recalcular() {
     const pesos = parseNum($pesos.value);
     const dolares = parseNum($dolares.value);
+    const yuanes = parseNum($yuanes.value);
     const cotizacion = parseNum($cotizacion.value) || 1;
+    const cotizacionCny = parseNum($cotizacionCny.value);
     const descuento = parseNum($descuento.value);
     const nacionalizacion = parseNum($nacionalizacion.value);
 
-    const bruto = pesos + (dolares * cotizacion);
+    const bruto = pesos + (dolares * cotizacion) + (yuanes * cotizacionCny);
     const recargoNac = bruto * (nacionalizacion / 100);
     const ahorro = bruto * (descuento / 100);
     const neto = bruto + recargoNac - ahorro;
@@ -118,7 +122,7 @@ $segmented.forEach(btn => {
 });
 
 // ---------- Selección al focus + recálculo al input ----------
-[$pesos, $dolares, $cotizacion, $descuento, $nacionalizacion].forEach(input => {
+[$pesos, $dolares, $yuanes, $cotizacion, $cotizacionCny, $descuento, $nacionalizacion].forEach(input => {
     input.addEventListener('focus', () => {
         // Pequeño delay para que selectionStart funcione en móvil
         setTimeout(() => input.select(), 0);
@@ -179,10 +183,22 @@ async function buscarDolar(tipo) {
     }
 }
 
+async function buscarYuan() {
+    try {
+        const r = await fetch('https://dolarapi.com/v1/cotizaciones/cny');
+        const data = await r.json();
+        const venta = Number(data.venta);
+        if (isNaN(venta) || venta <= 0) return;
+        $cotizacionCny.value = venta.toFixed(2);
+        recalcular();
+    } catch (e) { /* sin red, queda 0 y el usuario lo carga a mano */ }
+}
+
 // ---------- Limpiar ----------
 $btnLimpiar.addEventListener('click', () => {
     $pesos.value = '';
     $dolares.value = '';
+    $yuanes.value = '';
     $descuento.value = '0';
     $nacionalizacion.value = '0';
     modoCantidad = 'Unidad';
@@ -190,6 +206,7 @@ $btnLimpiar.addEventListener('click', () => {
     document.activeElement && document.activeElement.blur();
     recalcular();
     seleccionarTipo('Oficial');
+    buscarYuan();
 });
 
 // ---------- Theme toggle ----------
@@ -205,5 +222,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Arranque: traer cotización oficial
+// Arranque: traer cotización oficial y yuan
 seleccionarTipo('Oficial');
+buscarYuan();
