@@ -4,14 +4,10 @@ const $dolares = document.getElementById('dolares');
 const $yuanes = document.getElementById('yuanes');
 const $yenes = document.getElementById('yenes');
 const $cotizacion = document.getElementById('cotizacion');
-const $cotizacionCny = document.getElementById('cotizacionCny');
-const $cotizacionJpy = document.getElementById('cotizacionJpy');
+const $tasaCny = document.getElementById('tasaCny');
+const $tasaJpy = document.getElementById('tasaJpy');
 const $descuento = document.getElementById('descuento');
 const $nacionalizacion = document.getElementById('nacionalizacion');
-
-// Tasas internacionales: cuántos JPY/CNY hay por 1 USD (se sincronizan con el USD elegido)
-let cnyPerUsd = 0;
-let jpyPerUsd = 0;
 
 const $bruto = document.getElementById('bruto');
 const $recargoNac = document.getElementById('recargoNac');
@@ -72,12 +68,13 @@ function recalcular() {
     const yuanes = parseNum($yuanes.value);
     const yenes = parseNum($yenes.value);
     const cotizacion = parseNum($cotizacion.value) || 1;
-    const cotizacionCny = parseNum($cotizacionCny.value);
-    const cotizacionJpy = parseNum($cotizacionJpy.value);
+    const tasaCny = parseNum($tasaCny.value) || 1;
+    const tasaJpy = parseNum($tasaJpy.value) || 1;
     const descuento = parseNum($descuento.value);
     const nacionalizacion = parseNum($nacionalizacion.value);
 
-    const bruto = pesos + (dolares * cotizacion) + (yuanes * cotizacionCny) + (yenes * cotizacionJpy);
+    // Yuanes y yenes se convierten a USD usando la tasa internacional, después a ARS con la cotización
+    const bruto = pesos + (dolares * cotizacion) + (yuanes / tasaCny * cotizacion) + (yenes / tasaJpy * cotizacion);
     const recargoNac = bruto * (nacionalizacion / 100);
     const ahorro = bruto * (descuento / 100);
     const neto = bruto + recargoNac - ahorro;
@@ -130,7 +127,7 @@ $segmented.forEach(btn => {
 });
 
 // ---------- Selección al focus + recálculo al input ----------
-[$pesos, $dolares, $yuanes, $yenes, $cotizacion, $cotizacionCny, $cotizacionJpy, $descuento, $nacionalizacion].forEach(input => {
+[$pesos, $dolares, $yuanes, $yenes, $cotizacion, $tasaCny, $tasaJpy, $descuento, $nacionalizacion].forEach(input => {
     input.addEventListener('focus', () => {
         // Pequeño delay para que selectionStart funcione en móvil
         setTimeout(() => input.select(), 0);
@@ -143,12 +140,7 @@ $segmented.forEach(btn => {
                 input.value = v.replace(/^0/, '');
             }
         }
-        // Si edita la cotización USD a mano, recalcular yuan/yen para que sigan consistentes
-        if (input === $cotizacion) {
-            sincronizarCotizacionesForeign();
-        } else {
-            recalcular();
-        }
+        recalcular();
     });
 });
 
@@ -177,7 +169,6 @@ async function seleccionarTipo(id) {
         const valor = await buscarDolar(id.toLowerCase());
         $cotizacion.value = valor;
         $tipoDolarBtn.textContent = `Tipo de Cambio: ${id}`;
-        sincronizarCotizacionesForeign();
         recalcular();
     }
 }
@@ -202,19 +193,11 @@ async function buscarTasasForeign() {
         const r = await fetch('https://open.er-api.com/v6/latest/USD');
         const data = await r.json();
         if (data.rates) {
-            if (data.rates.CNY) cnyPerUsd = Number(data.rates.CNY);
-            if (data.rates.JPY) jpyPerUsd = Number(data.rates.JPY);
-            sincronizarCotizacionesForeign();
+            if (data.rates.CNY) $tasaCny.value = Number(data.rates.CNY).toFixed(2);
+            if (data.rates.JPY) $tasaJpy.value = Number(data.rates.JPY).toFixed(2);
+            recalcular();
         }
-    } catch (e) { /* sin red, queda 0 y el usuario lo carga a mano */ }
-}
-
-function sincronizarCotizacionesForeign() {
-    const cotiUsd = parseNum($cotizacion.value);
-    if (cotiUsd <= 0) return;
-    if (cnyPerUsd > 0) $cotizacionCny.value = (cotiUsd / cnyPerUsd).toFixed(2);
-    if (jpyPerUsd > 0) $cotizacionJpy.value = (cotiUsd / jpyPerUsd).toFixed(2);
-    recalcular();
+    } catch (e) { /* sin red, quedan los defaults del HTML */ }
 }
 
 // ---------- Limpiar ----------
@@ -230,6 +213,7 @@ $btnLimpiar.addEventListener('click', () => {
     document.activeElement && document.activeElement.blur();
     recalcular();
     seleccionarTipo('Oficial');
+    buscarTasasForeign();
 });
 
 // ---------- Theme toggle ----------
@@ -245,5 +229,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Arranque: traer tasas internacionales (yen/yuan) y después cotización oficial
-buscarTasasForeign().then(() => seleccionarTipo('Oficial'));
+// Arranque: tasas internacionales + cotización oficial en paralelo
+seleccionarTipo('Oficial');
+buscarTasasForeign();
