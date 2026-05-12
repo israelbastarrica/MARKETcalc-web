@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>MARKET Calculadora</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark">
+    <header class="topbar">
+        <div class="title">
+            <span class="title-main">MARKET</span>
+            <span class="title-sub">Calculadora</span>
+        </div>
+        <label class="switch" title="Modo oscuro">
+            <input type="checkbox" id="themeToggle" checked>
+            <span class="slider"></span>
+        </label>
+    </header>
+
+    <main class="content">
+        <div class="field">
+            <input type="text" inputmode="decimal" id="pesos" placeholder=" ">
+            <label for="pesos">Importe ARS</label>
+        </div>
+
+        <div class="field">
+            <input type="text" inputmode="decimal" id="dolares" placeholder=" ">
+            <label for="dolares">Importe USD</label>
+        </div>
+
+        <div class="dropdown">
+            <button type="button" id="tipoDolarBtn" class="outlined-button">
+                Buscando...
+            </button>
+            <div class="menu" id="tipoDolarMenu" hidden>
+                <button type="button" data-tipo="Oficial">Oficial</button>
+                <button type="button" data-tipo="Blue">Blue</button>
+                <button type="button" data-tipo="Manual">Manual</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="field">
+                <input type="text" inputmode="decimal" id="cotizacion" value="0" placeholder=" " disabled>
+                <label for="cotizacion">Coti.</label>
+            </div>
+            <div class="field">
+                <input type="text" inputmode="decimal" id="descuento" value="0" placeholder=" ">
+                <label for="descuento">% Off</label>
+            </div>
+            <div class="field">
+                <input type="text" inputmode="decimal" id="nacionalizacion" value="0" placeholder=" ">
+                <label for="nacionalizacion">% Nac.</label>
+            </div>
+        </div>
+
+        <div class="segmented" role="tablist">
+            <button type="button" class="seg active" data-modo="Unidad">Unidad</button>
+            <button type="button" class="seg" data-modo="Docena">Docena</button>
+        </div>
+
+        <section class="resumen">
+            <div class="resumen-label">RESUMEN</div>
+            <div class="resumen-line">Total Bruto: $ <span id="bruto">0</span></div>
+            <div class="resumen-line nac">Nacionalización: + $ <span id="recargoNac">0</span></div>
+            <div class="resumen-line desc">Descuento: - $ <span id="ahorro">0</span></div>
+            <hr>
+            <div class="resumen-label">TOTAL NETO</div>
+            <div class="resumen-neto">$ <span id="neto">0</span></div>
+            <div class="resumen-unitario" id="unitarioWrap" hidden>
+                <div class="resumen-label">PRECIO UNITARIO</div>
+                <div class="resumen-unitario-valor">$ <span id="unitario">0</span></div>
+            </div>
+        </section>
+
+        <section class="combo" id="comboWrap" hidden>
+            <div class="resumen-label">COMBO</div>
+            <div class="combo-valor" id="comboNombre">—</div>
+            <div class="combo-bar">
+                <div class="combo-bar-track"></div>
+                <div class="combo-bar-indicator" id="comboBarIndicator"></div>
+            </div>
+            <div class="combo-rango-labels">
+                <span id="comboDesde">$0</span>
+                <span id="comboHasta">$0</span>
+            </div>
+        </section>
+
+        <button type="button" id="btnLimpiar" class="limpiar-button">Limpiar campos</button>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
