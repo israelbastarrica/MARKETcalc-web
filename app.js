@@ -143,8 +143,9 @@ function actualizarCombo(precio) {
     $comboHasta.textContent = `${simbolo} ${formatearMoneda(c.hasta * factor, decimales)}`;
     $comboBarValor.textContent = `${simbolo} ${formatearMoneda(precio * factor, decimales)}`;
 
-    const pct = ((precio - c.desde) / (c.hasta - c.desde)) * 100;
-    $comboBarIndicator.style.left = Math.max(0, Math.min(100, pct)) + '%';
+    const pct = Math.max(0, Math.min(100, ((precio - c.desde) / (c.hasta - c.desde)) * 100));
+    $comboBarIndicator.style.left = pct + '%';
+    $comboBarValor.style.left = pct + '%';
 }
 
 $segmented.forEach(btn => {
