@@ -70,8 +70,17 @@ function recalcular() {
     const descuento = parseNum($descuento.value);
     const nacionalizacion = parseNum($nacionalizacion.value);
 
-    // Yuanes se convierten a USD usando la tasa internacional, después a ARS con la cotización
-    const bruto = pesos + (dolares * cotizacion) + (yuanes / tasaCny * cotizacion);
+    // Solo se usa la moneda activa. El campo ARS se autocompleta con la conversión si la activa es USD o CNY.
+    let bruto;
+    if (monedaActiva === 'USD') {
+        bruto = dolares * cotizacion;
+        $pesos.value = bruto > 0 ? Math.round(bruto).toString() : '';
+    } else if (monedaActiva === 'CNY') {
+        bruto = yuanes / tasaCny * cotizacion;
+        $pesos.value = bruto > 0 ? Math.round(bruto).toString() : '';
+    } else {
+        bruto = pesos;
+    }
     const recargoNac = bruto * (nacionalizacion / 100);
     const ahorro = bruto * (descuento / 100);
     const neto = bruto + recargoNac - ahorro;
