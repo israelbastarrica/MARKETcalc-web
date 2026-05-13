@@ -43,6 +43,7 @@ const $themeToggle = document.getElementById('themeToggle');
 
 let tipoDolar = 'Oficial';
 let modoCantidad = 'Unidad';
+let monedaActiva = 'ARS'; // se actualiza al escribir en ARS/USD/CNY
 
 // ---------- Parseo y formato ----------
 function parseNum(str) {
@@ -105,10 +106,23 @@ function actualizarCombo(precio) {
 
     const c = COMBOS[idx];
 
+    // Conversión ARS → moneda activa (USD, CNY o ARS)
+    const cotizacion = parseNum($cotizacion.value) || 1;
+    const tasaCny = parseNum($tasaCny.value) || 1;
+    let factor = 1;
+    let simbolo = '$';
+    if (monedaActiva === 'USD' && cotizacion > 0) {
+        factor = 1 / cotizacion;
+        simbolo = 'U$D';
+    } else if (monedaActiva === 'CNY' && cotizacion > 0) {
+        factor = tasaCny / cotizacion;
+        simbolo = '¥';
+    }
+
     $comboWrap.hidden = false;
     $comboNombre.textContent = c.combo;
-    $comboDesde.textContent = '$ ' + formatearMil(c.desde);
-    $comboHasta.textContent = '$ ' + formatearMil(c.hasta);
+    $comboDesde.textContent = `${simbolo} ${formatearMil(c.desde * factor)}`;
+    $comboHasta.textContent = `${simbolo} ${formatearMil(c.hasta * factor)}`;
 
     const pct = ((precio - c.desde) / (c.hasta - c.desde)) * 100;
     $comboBarIndicator.style.left = Math.max(0, Math.min(100, pct)) + '%';
@@ -136,6 +150,10 @@ $segmented.forEach(btn => {
                 input.value = v.replace(/^0/, '');
             }
         }
+        // Trackear última moneda usada para mostrar el rango del combo en esa moneda
+        if (input === $pesos) monedaActiva = 'ARS';
+        else if (input === $dolares) monedaActiva = 'USD';
+        else if (input === $yuanes) monedaActiva = 'CNY';
         recalcular();
     });
 });
@@ -203,6 +221,7 @@ $btnLimpiar.addEventListener('click', () => {
     $descuento.value = '0';
     $nacionalizacion.value = '0';
     modoCantidad = 'Unidad';
+    monedaActiva = 'ARS';
     $segmented.forEach(b => b.classList.toggle('active', b.dataset.modo === 'Unidad'));
     document.activeElement && document.activeElement.blur();
     recalcular();
