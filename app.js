@@ -20,6 +20,7 @@ const $comboNombre = document.getElementById('comboNombre');
 const $comboBarIndicator = document.getElementById('comboBarIndicator');
 const $comboDesde = document.getElementById('comboDesde');
 const $comboHasta = document.getElementById('comboHasta');
+const $comboBarValor = document.getElementById('comboBarValor');
 
 const COMBOS = [
     { desde: 1,     hasta: 2100,  combo: '2x6000' },
@@ -58,6 +59,11 @@ function formatearMil(numero) {
     return entero.split('').reverse().join('')
         .match(/.{1,3}/g).join('.')
         .split('').reverse().join('');
+}
+
+function formatearMoneda(numero, decimales) {
+    if (!decimales) return formatearMil(numero);
+    return numero.toLocaleString('es-AR', { minimumFractionDigits: decimales, maximumFractionDigits: decimales });
 }
 
 // ---------- Cálculo y render ----------
@@ -120,18 +126,22 @@ function actualizarCombo(precio) {
     const tasaCny = parseNum($tasaCny.value) || 1;
     let factor = 1;
     let simbolo = '$';
+    let decimales = 0;
     if (monedaActiva === 'USD' && cotizacion > 0) {
         factor = 1 / cotizacion;
         simbolo = 'U$D';
+        decimales = 2;
     } else if (monedaActiva === 'CNY' && cotizacion > 0) {
         factor = tasaCny / cotizacion;
         simbolo = '¥';
+        decimales = 2;
     }
 
     $comboWrap.hidden = false;
     $comboNombre.textContent = c.combo;
-    $comboDesde.textContent = `${simbolo} ${formatearMil(c.desde * factor)}`;
-    $comboHasta.textContent = `${simbolo} ${formatearMil(c.hasta * factor)}`;
+    $comboDesde.textContent = `${simbolo} ${formatearMoneda(c.desde * factor, decimales)}`;
+    $comboHasta.textContent = `${simbolo} ${formatearMoneda(c.hasta * factor, decimales)}`;
+    $comboBarValor.textContent = `${simbolo} ${formatearMoneda(precio * factor, decimales)}`;
 
     const pct = ((precio - c.desde) / (c.hasta - c.desde)) * 100;
     $comboBarIndicator.style.left = Math.max(0, Math.min(100, pct)) + '%';
