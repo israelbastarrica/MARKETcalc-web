@@ -146,10 +146,6 @@ function actualizarCombo(precio) {
     const pct = Math.max(0, Math.min(100, ((precio - c.desde) / (c.hasta - c.desde)) * 100));
     $comboBarIndicator.style.left = pct + '%';
     $comboBarValor.style.left = pct + '%';
-
-    // Esconder min/max si el valor actual está pegado al extremo, para que no se pisen
-    $comboDesde.style.visibility = pct < 20 ? 'hidden' : 'visible';
-    $comboHasta.style.visibility = pct > 80 ? 'hidden' : 'visible';
 }
 
 $segmented.forEach(btn => {

@@ -400,12 +400,17 @@ body:not(.dark) .segmented .seg.active {
 }
 
 .combo-rango-labels {
-    position: relative;
     display: flex;
     justify-content: space-between;
     color: var(--texto-secundario);
     font-size: 12px;
     margin-top: 6px;
+}
+
+.combo-valor-actual {
+    position: relative;
+    height: 20px;
+    margin-top: 2px;
 }
 
 /* ---------- Botón limpiar ---------- */
