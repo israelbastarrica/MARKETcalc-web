@@ -1,4 +1,4 @@
-const CACHE = 'marketcalc-v2';
+const CACHE = 'marketcalc-v3';
 const ASSETS = [
     './',
     './index.html',
@@ -29,8 +29,14 @@ self.addEventListener('fetch', e => {
     // Las APIs externas (dolarapi, er-api) no se cachean — si no hay red, fallan y la app usa localStorage
     if (url.origin !== self.location.origin) return;
 
-    // Para los assets propios: cache-first con fallback a red
+    // Network-first: con red, siempre la última versión; sin red, fallback al cache
     e.respondWith(
-        caches.match(e.request).then(cached => cached || fetch(e.request))
+        fetch(e.request)
+            .then(response => {
+                const clone = response.clone();
+                caches.open(CACHE).then(c => c.put(e.request, clone));
+                return response;
+            })
+            .catch(() => caches.match(e.request))
     );
 });
