@@ -1,0 +1,19 @@
+{
+    "name": "MARKET Calculadora",
+    "short_name": "MARKETcalc",
+    "description": "Calculadora de precios y combos",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#121212",
+    "theme_color": "#000000",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ]
+}

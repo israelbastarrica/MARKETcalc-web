@@ -212,14 +212,19 @@ $tipoDolarMenu.querySelectorAll('button').forEach(btn => {
 });
 
 async function buscarDolar(tipo) {
+    const cacheKey = `cotiUsd_${tipo}`;
     try {
         const r = await fetch(`https://dolarapi.com/v1/dolares/${tipo}`);
         const data = await r.json();
         const venta = Number(data.venta);
-        return isNaN(venta) ? '0' : String(Math.trunc(venta));
-    } catch (e) {
-        return '0';
-    }
+        if (!isNaN(venta) && venta > 0) {
+            const valor = String(Math.trunc(venta));
+            localStorage.setItem(cacheKey, valor);
+            return valor;
+        }
+    } catch (e) { /* fall through */ }
+    // Sin red o sin datos: usar último valor guardado
+    return localStorage.getItem(cacheKey) || '0';
 }
 
 async function buscarTasaCny() {
@@ -227,10 +232,19 @@ async function buscarTasaCny() {
         const r = await fetch('https://open.er-api.com/v6/latest/USD');
         const data = await r.json();
         if (data.rates && data.rates.CNY) {
-            $tasaCny.value = Number(data.rates.CNY).toFixed(2);
+            const valor = Number(data.rates.CNY).toFixed(2);
+            $tasaCny.value = valor;
+            localStorage.setItem('tasaCny', valor);
             recalcular();
+            return;
         }
-    } catch (e) { /* sin red, queda el default del HTML */ }
+    } catch (e) { /* fall through */ }
+    // Sin red: usar último valor guardado
+    const guardado = localStorage.getItem('tasaCny');
+    if (guardado) {
+        $tasaCny.value = guardado;
+        recalcular();
+    }
 }
 
 // ---------- Limpiar ----------

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <rect width="512" height="512" rx="96" fill="#000000"/>
+    <text x="50%" y="48%" font-family="Arial, sans-serif" font-weight="900" font-size="220" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">M</text>
+    <text x="50%" y="78%" font-family="Arial, sans-serif" font-weight="700" font-size="56" fill="#BB86FC" text-anchor="middle" dominant-baseline="central" letter-spacing="4">CALC</text>
+</svg>
